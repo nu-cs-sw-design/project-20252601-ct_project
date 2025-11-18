@@ -300,4 +300,38 @@ package "ui" {
     }
 }
 
+' Cards inside deck and players: shared objects, so aggregation (has-a, but cards can move)
+domain.game.Deck  "1" o-- "*" domain.game.Card   : cards >
+domain.game.Player "1" o-- "*" domain.game.Card  : hand >
+
+' Game aggregates deck and players
+domain.game.Game  "1" o-- "1" domain.game.Deck   : deck >
+domain.game.Game  "1" o-- "*" domain.game.Player : players >
+
+' Card classified by CardType, CardType linked to GameType
+domain.game.Card       --> "1" domain.game.CardType   : has type >
+domain.game.CardType   --> "1" domain.game.GameType   : belongs to >
+
+domain.game.Deck    "1" o-- "1" domain.game.Instantiator   : instantiator >
+domain.game.Player  "1" o-- "1" domain.game.Instantiator   : instantiator >
+
+' UI holds a Game
+ui.GameUI "1" o-- "1" domain.game.Game : game >
+
+' GameUI also directly uses Player, Card, CardType, Deck in many methods
+ui.GameUI ..> domain.game.Player
+ui.GameUI ..> domain.game.Card
+ui.GameUI ..> domain.game.CardType
+ui.GameUI ..> domain.game.Deck
+
+' Main wires everything
+ui.Main --> domain.game.Instantiator
+ui.Main --> domain.game.Deck
+ui.Main --> domain.game.Player
+ui.Main --> domain.game.Game
+ui.Main --> ui.GameUI
+ui.Main --> domain.game.Card
+ui.Main --> domain.game.CardType
+ui.Main --> domain.game.GameType
+
 @enduml
