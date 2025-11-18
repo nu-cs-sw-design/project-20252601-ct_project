@@ -1,0 +1,196 @@
+@startuml
+package "domain.game" {
+
+
+    class Card {
+        - cardType: CardType
+        - isMarked: boolean
+        - isFacedUp: boolean
+
+        + Card(cardType: CardType)
+        + getCardType(): CardType
+        + markCard(): void
+        + checkIfMarked(): boolean
+        + setFacedUp(): void
+        + checkIfFacedUp(): boolean
+    }
+
+    enum CardType {
+        NOPE
+        DEFUSE
+        ATTACK
+        SHUFFLE
+        SKIP
+        SEE_THE_FUTURE
+        CAT_ONE
+        CAT_TWO
+        CAT_THREE
+        CAT_FOUR
+        EXPLODING_KITTEN
+        STREAKING_KITTEN
+        SWAP_TOP_AND_BOTTOM
+        GARBAGE_COLLECTION
+        CURSE_OF_THE_CAT_BUTT
+        ALTER_THE_FUTURE
+        CATOMIC_BOMB
+        SUPER_SKIP
+        MARK
+        IMPLODING_KITTEN
+        REVERSE
+        FERAL_CAT
+        TARGETED_ATTACK
+        DRAW_FROM_THE_BOTTOM
+    }
+
+    enum GameType {
+        NONE
+        EXPLODING_KITTENS
+        STREAKING_KITTENS
+        IMPLODING_KITTENS
+    }
+
+    class Deck {
+        - deck: List<Card>
+        - rand: Random
+        - gameType: GameType
+        - numberOfPlayers: int
+        - maxDeckSize: int
+        - instantiator: Instantiator
+
+        + Deck(deck: List<Card>, rand: Random,
+               gameType: GameType, numberOfPlayers: int,
+               maxDeckSize: int, instantiator: Instantiator)
+
+        + getDeckSize(): int
+        + getCardAtIndex(index: int): Card
+        + initializeDeck(): void
+        + shuffleDeck(): void
+        + insertCard(cardType: CardType, numberOfCards: int, bottom: boolean): void
+        + drawCard(): Card
+        + drawCardFromBottom(): Card
+        + setNumberOfPlayers(numberOfPlayers: int): void
+        + chooseGameType(gameType: GameType): void
+        + removeBombs(): int
+        + insertExplodingKittenAtIndex(indexToInsert: int): void
+        + insertImplodingKittenAtIndex(indexToInsert: int, card: Card): void
+        + reorderDeckCards(newOrderIndices: int[], cardsToReorder: List<Card>): void
+    }
+
+    class Player {
+        - playerID: int
+        - hand: List<Card>
+        - isDead: boolean
+        - rand: Random
+        - isCursed: boolean
+
+        + Player(playerID: int, instantiator: Instantiator)
+
+        + getPlayerID(): int
+        + addDefuse(defuse: Card): void
+        + addCardToHand(card: Card): void
+        + hasCard(cardType: CardType): boolean
+        + getHandSize(): int
+        + getCardAt(index: int): Card
+        + getIndexOfCard(cardType: CardType): int
+        + removeCardFromHand(index: int): CardType
+        + shuffleHand(): void
+        + checkNumberOfCardsInHand(cardType: CardType): int
+        + getIsDead(): boolean
+        + setIsDead(): void
+        + getIsCursed(): boolean
+        + setCursed(isCursed: boolean): void
+    }
+
+    class Instantiator {
+        + createCard(cardType: CardType): Card
+        + createRandom(): Random
+        + createCardList(): ArrayList<Card>
+    }
+
+    class Game {
+        - numberOfPlayers: int
+        - gameType: GameType
+        - deck: Deck
+        - players: Player[]
+        - rand: Random
+
+        - currentPlayerTurn: int
+        - currentPlayerNumberOfTurns: int
+        - isReversed: boolean
+        - attackQueue: List<Integer>
+        - attackCounter: int
+        - numberOfAttacks: int
+        - turnTracker: int[]
+        - attacked: boolean
+
+        + Game(numberOfPlayers: int, gameType: GameType,
+               deck: Deck, players: Player[],
+               rand: Random, attackQueue: List<Integer>,
+               turnTracker: int[])
+
+        + swapTopAndBottom(): void
+        + stealRandomCard(playerToStealFrom: int): Card
+        + stealTypeCard(cardType: CardType, playerToStealFrom: int): void
+
+        + startAttackPhase(): void
+        + playAttack(): void
+        + playTargetedAttack(attackedPlayerIndex: int): void
+
+        + playExplodingKitten(playerIndex: int): boolean
+        + playImplodingKitten(): void
+        + playDefuse(idxToInsertExplodingKitten: int, playerIndex: int): void
+        + playCatomicBomb(): void
+        + playReverse(): void
+        + playShuffle(numberOfShuffles: int): void
+        + playSkip(superSkip: boolean): int
+        + playGarbageCollection(cardToDiscard: CardType): void
+        + playMark(playerIndex: int, cardIndex: int): void
+
+        + setNumberOfPlayers(numberOfPlayers: int): void
+        + retrieveGameMode(gameType: GameType): void
+        + getGameType(): GameType
+        + getDeck(): Deck
+        + getPlayerAtIndex(playerIndex: int): Player
+        + getPlayerTurn(): int
+        + getNumberOfPlayers(): int
+        + getDeckSize(): int
+        + getNumberOfTurns(): int
+        + checkNumberOfAlivePlayers(): int
+
+        + incrementPlayerTurn(): void
+        + incrementAttackCounter(): void
+        + setAttackCounter(playerIndex: int): void
+        + setPlayerNumberOfTurns(): void
+        + setCurrentPlayerNumberOfTurns(numberOfTurns: int): void
+        + decrementNumberOfTurns(): void
+        + setTurnToTargetedIndexIfAttackOccurred(): void
+
+        + drawCard(): Card
+        + drawFromBottom(): Card
+        + getCardAtIndex(cardIndex: int): Card
+        + addCardToHand(card: Card): void
+        + removeCardFromHand(playerIndex: int, cardType: CardType): void
+        + getIndexOfCardFromHand(playerIndex: int, cardType: CardType): int
+        + checkIfPlayerDead(playerIndex: int): boolean
+        + checkIfPlayerHasCard(playerIndex: int, cardType: CardType): boolean
+        + getCardType(playerIndex: int, cardIndex: int): CardType
+        + getHandSize(playerIndex: int): int
+        + getDeckCardType(deckIndex: int): CardType
+
+        + addAttackQueue(attack: int): void
+        + removeAttackQueue(): int
+        + isAttackQueueEmpty(): boolean
+
+        + getIsReversed(): boolean
+        + getTurnCountOfPlayer(playerIndex: int): int
+        + getAttacked(): boolean
+        + getAttackCounter(): int
+        + getNumberOfAttacks(): int
+
+        ~ getGameTypeForTesting(): GameType
+        ~ setNumberOfAttacks(numberOfAttacks: int): void
+        ~ setAttacked(attacked: boolean): void
+        ~ setCurrentPlayerTurn(turn: int): void
+    }
+}
+@enduml
