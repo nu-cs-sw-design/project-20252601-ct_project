@@ -349,4 +349,83 @@ application.CardPlayService ..> application.CardEffect
 application.AbstractCardEffect ..> domain.game.Game
 application.AbstractCardEffect ..> application.CardPlayContext
 
+package "ui" {
+
+    +class GameUI {
+        - game: domain.game.Game
+        - cardPlayService: application.CardPlayService
+        - messages: ResourceBundle
+
+        + GameUI(game: domain.game.Game, cardPlayService: application.CardPlayService)
+
+        + chooseLanguage(): void
+        + chooseGame(): void
+        + chooseNumberOfPlayers(): void
+        + startTurn(): void
+        + endGame(): void
+        + checkIfGameOver(): boolean
+
+        - checkValidPlayerIndexInput(): int
+        - startAttackFollowUp(targeted: boolean): void
+        - swapTopAndBottom(): void
+        - playAttack(targeted: boolean): void
+        - playGarbageCollection(): void
+        - printPlayerTurn(): void
+        - playedCard(): int
+        - playSpecialCombo(): int
+        - playNope(playerIndex: int): void
+        - checkAllPlayersForNope(playerIndex: int): boolean
+        - playExplodingKitten(playerIndex: int): boolean
+        - endTurn(): boolean
+        - checkIfTheyEndTurn(): boolean
+        - playCurseOfTheCatButt(): void
+        - playSpecialComboTwoCards(cardType: domain.game.CardType): void
+        - drawFromTheBottom(): void
+        - playMark(): void
+        - playCatomicBomb(): void
+        - playReverse(): void
+        - playSpecialComboThreeCards(cardType: domain.game.CardType): void
+        - playSeeTheFuture(): void
+        - playShuffle(): void
+        - playSkip(superSkip: boolean): void
+        - playAlterTheFuture(): void
+
+        - checkIfCatCard(cardType: domain.game.CardType): boolean
+        - checkNumberOfFeralCats(playerIndex: int): int
+        - promptCursedMessage(): void
+        - checkCardIfInvalid(card: domain.game.Card): boolean
+        - playImplodingKitten(card: domain.game.Card): boolean
+
+        - checkUserWithinBounds(userIndex: int): boolean
+        - checkUserOutOfBounds(userIndex: int): boolean
+        - checkIfPlayerIsAlive(userIndex: int): boolean
+        - hasCard(userIndex: int, cardType: domain.game.CardType): boolean
+        - hasCardDirect(player: domain.game.Player, cardType: domain.game.CardType): boolean
+        - checkCardWithinBounds(cardIndex: int, player: domain.game.Player): boolean
+        - checkCardWithinBoundsIndexed(cardIndex: int, playerIndex: int): boolean
+        - checkMatchingCardType(cardType: domain.game.CardType, cardTypeTwo: domain.game.CardType): boolean
+        - checkIfPlayerIsCursed(player: domain.game.Player): boolean
+        - checkReversed(): boolean
+        - getHandSize(playerIndex: int): int
+        - checkIfCardMarked(playerIndex: int, cardIndex: int): boolean
+        - getNumberOfPlayers(): int
+        - checkExplodingKitten(playerIndex: int): boolean
+        - checkIfNumberOfTurnsGreaterThanZero(): boolean
+        - checkIfNumberOfTurnsIsZero(): boolean
+        - checkIfCurrentPlayerTurn(playerIndex: int): boolean
+        - getDeckSize(): int
+        - matchingGameType(gameType: domain.game.GameType): boolean
+        - checkFeralCat(numberOfFeralCatsToPlay: int, numberOfFeralCats: int, numberOfCatType: int, threshold: int): boolean
+        - checkIfDifferentCardType(cardType: domain.game.CardType, cardTypeTwo: domain.game.CardType): boolean
+        - checkAllPlayersNope(): boolean
+        - checkNumberOfCards(player: domain.game.Player, cardType: domain.game.CardType, threshold: int): boolean
+        - getLocalizedCardType(cardType: domain.game.CardType): String
+        - checkNegativeIndexDeck(indexToInsert: int): boolean
+        - checkIfGreaterThanMaxIndexDeck(indexToInsert: int): boolean
+    }
+
+    +class Main {
+        + {static} main(args: String[]): void
+    }
+}
 @enduml
