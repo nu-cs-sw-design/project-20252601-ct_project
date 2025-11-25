@@ -259,4 +259,94 @@ domain.game.Game ..> domain.game.GameEvent
 domain.game.GameEvent --> domain.game.CardType
 domain.game.GameEvent --> domain.game.GameEventType
 
+package "application" {
+
+    +class CardPlayContext {
+        - currentPlayerIndex: int
+        - targetPlayerIndex: Integer
+        - card: domain.game.Card
+        - cancelled: boolean
+
+        + CardPlayContext(currentPlayerIndex: int, card: domain.game.Card)
+        + setTargetPlayerIndex(targetPlayerIndex: int): void
+        + getCurrentPlayerIndex(): int
+        + getTargetPlayerIndex(): Integer
+        + getCard(): domain.game.Card
+        + cancel(): void
+        + isCancelled(): boolean
+    }
+
+    +interface CardEffect {
+        + apply(game: domain.game.Game, context: CardPlayContext): void
+    }
+
+    abstract class AbstractCardEffect {
+        + apply(game: domain.game.Game, context: CardPlayContext): void
+        # validate(game: domain.game.Game, context: CardPlayContext): void
+        # doApply(game: domain.game.Game, context: CardPlayContext): void
+    }
+
+    CardEffect <|.. AbstractCardEffect
+
+    +class ExplodingKittenEffect {
+        + ExplodingKittenEffect()
+        # validate(game: domain.game.Game, context: CardPlayContext): void
+        # doApply(game: domain.game.Game, context: CardPlayContext): void
+    }
+
+    +class NopeEffect {
+        + NopeEffect()
+        # validate(game: domain.game.Game, context: CardPlayContext): void
+        # doApply(game: domain.game.Game, context: CardPlayContext): void
+    }
+
+    +class ShuffleEffect {
+        + ShuffleEffect()
+        # validate(game: domain.game.Game, context: CardPlayContext): void
+        # doApply(game: domain.game.Game, context: CardPlayContext): void
+    }
+
+    +class SkipEffect {
+        + SkipEffect()
+        # validate(game: domain.game.Game, context: CardPlayContext): void
+        # doApply(game: domain.game.Game, context: CardPlayContext): void
+    }
+
+    +class NullEffect {
+        + NullEffect()
+        + apply(game: domain.game.Game, context: CardPlayContext): void
+    }
+
+    AbstractCardEffect <|-- ExplodingKittenEffect
+    AbstractCardEffect <|-- NopeEffect
+    AbstractCardEffect <|-- ShuffleEffect
+    AbstractCardEffect <|-- SkipEffect
+    CardEffect <|.. NullEffect
+
+    +class CardEffectFactory {
+        + CardEffectFactory()
+        + createEffect(cardType: domain.game.CardType): CardEffect
+    }
+
+    +class CardPlayService {
+        - game: domain.game.Game
+        - effectFactory: CardEffectFactory
+
+        + CardPlayService(game: domain.game.Game,
+                          effectFactory: CardEffectFactory)
+
+        + playCard(context: CardPlayContext): void
+    }
+}
+
+application.CardPlayContext "1" o-- "1" domain.game.Card : playedCard >
+application.CardEffectFactory ..> domain.game.CardType
+application.CardEffectFactory ..> application.CardEffect
+application.CardPlayService "1" o-- "1" domain.game.Game           : game >
+application.CardPlayService "1" o-- "1" application.CardEffectFactory : effectFactory >
+application.CardPlayService ..> application.CardPlayContext
+application.CardPlayService ..> application.CardEffect
+application.AbstractCardEffect ..> domain.game.Game
+application.AbstractCardEffect ..> application.CardPlayContext
+
 @enduml
