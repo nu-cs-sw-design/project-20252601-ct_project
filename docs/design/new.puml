@@ -428,4 +428,22 @@ package "ui" {
         + {static} main(args: String[]): void
     }
 }
+
+domain.game.GameObserver <|.. ui.GameUI
+ui.GameUI "1" o-- "1" domain.game.Game          : game >
+ui.GameUI "1" o-- "1" application.CardPlayService : cardService >
+ui.GameUI ..> domain.game.Card
+ui.GameUI ..> domain.game.CardType
+ui.GameUI ..> domain.game.Player
+
+ui.Main --> domain.game.Instantiator
+ui.Main --> domain.game.Deck
+ui.Main --> domain.game.Player
+ui.Main --> domain.game.Game
+ui.Main --> application.CardEffectFactory
+ui.Main --> application.CardPlayService
+ui.Main --> ui.GameUI
+ui.Main --> domain.game.Card
+ui.Main --> domain.game.CardType
+ui.Main --> domain.game.GameType
 @enduml
