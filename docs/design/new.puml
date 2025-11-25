@@ -244,4 +244,19 @@ package "domain.game" {
         - notifyGameOver(): void
     }
 }
+
+domain.game.Deck  "1" o-- "*" domain.game.Card        : cards >
+domain.game.Player "1" o-- "*" domain.game.Card       : hand >
+domain.game.Game  "1" o-- "1" domain.game.Deck        : deck >
+domain.game.Game  "1" o-- "*" domain.game.Player      : players >
+domain.game.Card       --> "1" domain.game.CardType   : has type >
+domain.game.CardType   --> "1" domain.game.GameType   : belongs to >
+domain.game.Deck       "1" o-- "1" domain.game.Instantiator : instantiator >
+domain.game.Player     "1" o-- "1" domain.game.Instantiator : instantiator >
+domain.game.Game       "1" o-- "*" domain.game.GameObserver : observers >
+domain.game.GameObserver ..> domain.game.GameEvent
+domain.game.Game ..> domain.game.GameEvent
+domain.game.GameEvent --> domain.game.CardType
+domain.game.GameEvent --> domain.game.GameEventType
+
 @enduml
