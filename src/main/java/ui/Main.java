@@ -8,6 +8,9 @@ import domain.game.Game;
 import domain.game.GameType;
 import domain.game.Player;
 
+import application.CardEffectFactory;
+import application.CardPlayService;
+
 import java.util.ArrayList;
 import java.security.SecureRandom;
 
@@ -29,10 +32,14 @@ public class Main {
 				new Player(playerIDThree, instantiator),
 				new Player(playerIDFour, instantiator)};
 		int[] turnTracker = {1, 1, 1, 1, 1};
-		Game game = new Game(0, GameType.NONE, deck,
-				players, new SecureRandom(),
-				new ArrayList<Integer>(), turnTracker);
-		GameUI gameUI = new GameUI(game);
+        Game game = new Game(0, GameType.NONE, deck,
+                players, new SecureRandom(),
+                new ArrayList<Integer>(), turnTracker);
+
+        CardEffectFactory effectFactory = new CardEffectFactory();
+        CardPlayService cardPlayService = new CardPlayService(game, effectFactory);
+        GameUI gameUI = new GameUI(game, cardPlayService);
+        game.addObserver(gameUI);
 		gameUI.chooseLanguage();
 		gameUI.chooseGame();
 		gameUI.chooseNumberOfPlayers();
