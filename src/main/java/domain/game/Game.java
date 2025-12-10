@@ -1,5 +1,6 @@
 package domain.game;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -18,6 +19,7 @@ public class Game {
 	private int numberOfAttacks;
 	private int[] turnTracker;
 	private boolean attacked;
+    private List<GameObserver> observers;
 
 	private static final String PLAYER_HAND_EMPTY_EXCEPTION = "Player has no cards to steal";
 	private static final String INVALID_PLAYER_INDEX_EXCEPTION = "Invalid player index.";
@@ -51,6 +53,7 @@ public class Game {
 		this.attackCounter = 0;
 		this.numberOfAttacks = 0;
 		this.attacked = false;
+        this.observers = new ArrayList<>();
 	}
 
 	public void swapTopAndBottom() {
@@ -133,19 +136,28 @@ public class Game {
 		attacked = true;
 	}
 
-	public boolean playExplodingKitten(int playerIndex) {
-		if (checkUserOutOfBounds(playerIndex)) {
-			throw new UnsupportedOperationException(INVALID_PLAYER_INDEX_EXCEPTION);
-		}
-		if (checkIfPlayerHasCard(playerIndex, CardType.DEFUSE)) {
-			return false;
-		}
-		players[playerIndex].setIsDead();
-		if (playerIndex == currentPlayerTurn) {
-			setCurrentPlayerNumberOfTurns(0);
-		}
-		return true;
-	}
+    public void playNope(int playerIndex) {
+        removeCardFromHand(playerIndex, CardType.NOPE);
+        notifyCardPlayed(playerIndex, CardType.NOPE);
+    }
+
+    public boolean playExplodingKitten(int playerIndex) {
+        if (checkUserOutOfBounds(playerIndex)) {
+            throw new UnsupportedOperationException(INVALID_PLAYER_INDEX_EXCEPTION);
+        }
+        boolean exploded;
+        if (checkIfPlayerHasCard(playerIndex, CardType.DEFUSE)) {
+            exploded = false;
+        } else {
+            players[playerIndex].setIsDead();
+            if (playerIndex == currentPlayerTurn) {
+                setCurrentPlayerNumberOfTurns(0);
+            }
+            exploded = true;
+        }
+        notifyCardPlayed(playerIndex, CardType.EXPLODING_KITTEN);
+        return exploded;
+    }
 
 	public void playImplodingKitten() {
 		setCurrentPlayerNumberOfTurns(0);
@@ -228,28 +240,30 @@ public class Game {
 		return players[randomPlayerIndex];
 	}
 
-	public void playShuffle(int numberOfShuffles) {
-		for (int i = 0; i < numberOfShuffles; i++) {
-			deck.shuffleDeck();
-		}
-	}
+    public void playShuffle(int numberOfShuffles) {
+        for (int i = 0; i < numberOfShuffles; i++) {
+            deck.shuffleDeck();
+        }
+        notifyCardPlayed(currentPlayerTurn, CardType.SHUFFLE);
+    }
 
 
-	public int playSkip(boolean superSkip) {
-		if (checkIfNumberOfTurnsOutOfBounds()) {
-			throw new UnsupportedOperationException(
-					NUMBER_OF_TURNS_OUT_OF_BOUNDS_EXCEPTION);
-		}
-		if (superSkip) {
-			setCurrentPlayerNumberOfTurns(0);
-		} else {
-			currentPlayerNumberOfTurns--;
-		}
-		if (checkIfNumberOfTurnsIsZero()) {
-			incrementPlayerTurn();
-		}
-		return currentPlayerNumberOfTurns;
-	}
+    public int playSkip(boolean superSkip) {
+        if (checkIfNumberOfTurnsOutOfBounds()) {
+            throw new UnsupportedOperationException(
+                    NUMBER_OF_TURNS_OUT_OF_BOUNDS_EXCEPTION);
+        }
+        if (superSkip) {
+            setCurrentPlayerNumberOfTurns(0);
+        } else {
+            currentPlayerNumberOfTurns--;
+        }
+        if (checkIfNumberOfTurnsIsZero()) {
+            incrementPlayerTurn();
+        }
+        notifyCardPlayed(currentPlayerTurn, superSkip ? CardType.SUPER_SKIP : CardType.SKIP);
+        return currentPlayerNumberOfTurns;
+    }
 
 	public void playGarbageCollection(CardType cardToDiscard) {
 		deck.insertCard(cardToDiscard, 1, false);
@@ -333,16 +347,19 @@ public class Game {
 		return numberOfPlayers;
 	}
 
-	public int checkNumberOfAlivePlayers() {
-		int counter = 0;
-		for (int playerIndex = 0; playerIndex < numberOfPlayers; playerIndex++) {
-			domain.game.Player player = getPlayerAtIndex(playerIndex);
-			if (!player.getIsDead()) {
-				counter++;
-			}
-		}
-		return counter;
-	}
+    public int checkNumberOfAlivePlayers() {
+        int counter = 0;
+        for (int playerIndex = 0; playerIndex < numberOfPlayers; playerIndex++) {
+            domain.game.Player player = getPlayerAtIndex(playerIndex);
+            if (!player.getIsDead()) {
+                counter++;
+            }
+        }
+        if (counter == 1) {
+            notifyGameOver();
+        }
+        return counter;
+    }
 
 	public void setCurrentPlayerNumberOfTurns(int numberOfTurns) {
 		currentPlayerNumberOfTurns = numberOfTurns;
@@ -481,6 +498,37 @@ public class Game {
 	public int getNumberOfAttacks() {
 		return numberOfAttacks;
 	}
+
+    public void addObserver(GameObserver observer) {
+        if (observer == null) {
+            return;
+        }
+        observers.add(observer);
+    }
+
+    public void removeObserver(GameObserver observer) {
+        observers.remove(observer);
+    }
+
+    private void notifyCardPlayed(int actorPlayerIndex, CardType cardType) {
+        if (observers == null || observers.isEmpty()) {
+            return;
+        }
+        GameEvent event = new GameEvent(GameEventType.CARD_PLAYED, actorPlayerIndex, cardType);
+        for (GameObserver observer : observers) {
+            observer.onCardPlayed(event);
+        }
+    }
+
+    private void notifyGameOver() {
+        if (observers == null || observers.isEmpty()) {
+            return;
+        }
+        GameEvent event = new GameEvent(GameEventType.GAME_OVER, -1, null);
+        for (GameObserver observer : observers) {
+            observer.onGameOver(event);
+        }
+    }
 
 	void setNumberOfAttacks(int numberOfAttacks) {
 		this.numberOfAttacks = numberOfAttacks;
