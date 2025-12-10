@@ -1,8 +1,7 @@
 # Project: Exploding Kitten Refactor
 
 ## Contributors
-Dr. Yiji Zhang
-Refactoring by Sebastian Pacheco
+Dr. Yiji Zhang, Refactoring by Sebastian Pacheco
 
 ## Dependencies
 - JDK 11
@@ -10,7 +9,6 @@ Refactoring by Sebastian Pacheco
 - Gradle 8.10
 
 ## Build Instructions
-HOW TO BUILD YOUR PROJECT.
 1. Press Gradle icon in IntelliJ.
 2. Under course-project/Tasks/build/build right click to run to build.
 3. Right-click on the Main file in the ui package and run.
